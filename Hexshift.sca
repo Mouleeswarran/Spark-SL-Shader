@@ -1,0 +1,34 @@
+#define ISQRT3 0.5773502691896258
+#define HEXES 12.0
+#define MOVE 0.05
+#define iTime std::getTime()
+vec4 mainImage( std::Texture2d myTex ) {
+    
+    vec2 iResolution = std::getRenderTargetSize();
+    	
+	vec2 fragCoord = fragment(std::getFragmentCoord().xy);
+         fragCoord=fragCoord -vec2(0,1) ;
+   	 vec4 fragColor; 
+    vec2 uv = fragCoord / iResolution.xy;
+     
+    // Scale our coordinates uniformly to show more hexes
+	vec2 p = HEXES * fragCoord / iResolution.y;
+    
+    // Produce hexagonal pattern by scaling the x and shearing the y
+    vec2 q = vec2( p.x * 2.0 * ISQRT3, p.y + p.x * ISQRT3 );
+	
+    // Quantize into hexagons
+	vec2 qi = floor( q );
+	vec2 qf = fract( q );
+	float v = mod( qi.x + qi.y, 3.0 );
+	float ca = step( 1.0, v );
+	float cb = step( 2.0, v );
+	vec2  ma = step( qf.xy, qf.yx );
+    vec2 s = qi + ca - cb * ma;
+	
+    // Calculate an offset for the tile
+	vec2 o = MOVE * sin( iTime + s );
+   
+    fragColor = myTex.sample(vec2(uv.x, 1. - uv.y) + o );
+    return fragColor;
+}

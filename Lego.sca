@@ -1,0 +1,26 @@
+
+const float c = 0.02;//amout of blocks = c*iResolution.x
+
+vec4 mainImage(std::Texture2d inTex){
+    //blocked pixel coordinate
+    vec2 iResolution = std::getRenderTargetSize();
+    vec2 fragCoord = fragment(floor(std::getRenderTargetSize() * std::getVertexTexCoord()));
+    vec4 fragColor;
+    vec2 middle = floor(fragCoord*c+.5)/c;
+
+    vec4 color = inTex.sample(middle/iResolution.xy).rgba;
+    
+    //lego block effects
+        //stud
+        float dis = abs(distance(fragCoord,middle)*c*2.-.6);    
+        color *= smoothstep(0.1,0.05,dis)*dot(vec2(0.707),normalize(fragCoord-middle))*.5+1.;
+
+        //side shadow
+        vec2 delta = abs(fragCoord-middle)*c*2.;
+        float sdis = max(delta.x,delta.y);
+    	
+    	color *= .8+smoothstep(.95,.8,sdis)*.2;
+
+	fragColor = vec4(color);
+	return fragColor;
+}
