@@ -1,0 +1,111 @@
+const int half_width = 5;
+
+// Calculate color distance
+float CalcDistance(in vec3 c0, in vec3 c1) {
+    vec3 sub = c0 - c1;
+    return dot(sub, sub);
+}
+
+
+
+vec4 mainImage(  std::Texture2d inTex )
+{
+    vec2 iResolution = std::getRenderTargetSize();
+    vec2 fragCoord = fragment(std::getRenderTargetSize() * std::getVertexTexCoord());
+    vec4 fragColor;
+    vec2 src_size = iResolution.xy;
+    vec2 inv_src_size = 1.0f / src_size;\
+    vec2 uv = fragCoord * inv_src_size;
+    
+    float n = float((half_width + 1) * (half_width + 1));
+    float inv_n = 1.0f / n;
+    
+    vec4 col = vec4(0, 0, 0, 0);
+    
+    float sigma2 = 0.0f;
+    float min_sigma = 100.0f;
+    
+    vec4 m = vec4(0, 0, 0, 0);
+    vec4 s = vec4(0, 0, 0, 0);
+    
+    
+    for (int j = -half_width; j <= 0; ++j) {
+        for (int i = -half_width; i <= 0; ++i) {
+            vec4 c = inTex.sample( uv + vec2(i, j) * inv_src_size);
+            m += c;
+            s += c * c;
+        }
+    }
+    
+    m *= inv_n;
+    s = abs(s * inv_n - m * m);
+    
+    sigma2 = s.x + s.y + s.z;
+    if (sigma2 < min_sigma) {
+        min_sigma = sigma2;
+        col = m;
+    }
+    
+    m = vec4(0, 0, 0, 0);
+    s = vec4(0, 0, 0, 0);
+    
+    for (int j = -half_width; j <= 0; ++j) {
+        for (int i = 0; i <= half_width; ++i) {
+            vec4 c = inTex.sample(uv + vec2(i, j) * inv_src_size);
+            m += c;
+            s += c * c;
+        }
+    }
+    
+    m *= inv_n;
+    s = abs(s * inv_n - m * m);
+    
+    sigma2 = s.x + s.y + s.z;
+    if (sigma2 < min_sigma) {
+        min_sigma = sigma2;
+        col = m;
+    }
+    
+    m = vec4(0, 0, 0, 0);
+    s = vec4(0, 0, 0, 0);
+    
+    for (int j = 0; j <= half_width; ++j) {
+        for (int i = 0; i <= half_width; ++i) {
+            vec4 c = inTex.sample( uv + vec2(i, j) * inv_src_size);
+            m += c;
+            s += c * c;
+        }
+    }
+    
+    m *= inv_n;
+    s = abs(s * inv_n - m * m);
+    
+    sigma2 = s.x + s.y + s.z;
+    if (sigma2 < min_sigma) {
+        min_sigma = sigma2;
+        col = m;
+    }
+    
+    m = vec4(0, 0, 0, 0);
+    s = vec4(0, 0, 0, 0);
+    
+    for (int j = 0; j <= half_width; ++j) {
+        for (int i = -half_width; i <= 0; ++i) {
+            vec4 c = inTex.sample( uv + vec2(i, j) * inv_src_size);
+            m += c;
+            s += c * c;
+        }
+    }
+    
+    m *= inv_n;
+    s = abs(s * inv_n - m * m);
+    
+    sigma2 = s.x + s.y + s.z;
+    if (sigma2 < min_sigma) {
+        min_sigma = sigma2;
+        col = m;
+    }
+    
+    fragColor =col;
+    return fragColor;
+}
