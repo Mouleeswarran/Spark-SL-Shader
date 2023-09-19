@@ -1,0 +1,16 @@
+
+vec4 main(std::Texture2d inTex, std::Texture2d GradientTex ) {
+  
+  vec2 iResolution = std::getRenderTargetSize();
+  vec2 fragCoord = fragment( iResolution * std::getVertexTexCoord());
+  vec4 fragColor;
+  vec2 uv = fragCoord;
+  vec2 xz = fragCoord.xy / iResolution.xy;
+  vec4 Incolor = inTex.sample(xz);
+  float grayScale = dot(Incolor.rgb,  vec3(0.299, 0.587, 0.114));
+  
+  vec3 SampledColor = GradientTex.sample(vec2(grayScale , 0.0)).rgb;
+  fragColor.rgb = mix(Incolor.rgb, SampledColor.rgb, 1.);
+  fragColor.a = Incolor.a;
+  return fragColor;
+}

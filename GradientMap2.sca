@@ -1,0 +1,28 @@
+
+using namespace std;
+// @param[default=#00FFFFFF] color1
+// @param[default=#0000C0FF] color2
+vec4 mainImage( vec4 color1, vec4 color2, Texture2d inTex) {
+    
+    //vec3 color1 = vec3(1.0,1.0,0.0);
+    //vec3 color2 = vec3(0.4745098039, 0.6392156863, 0.3882352941);
+    
+     vec2 iResolution = getRenderTargetSize();
+    vec2 fragCoord = fragment( iResolution * getVertexTexCoord());
+    vec4 fragColor;
+
+    vec2 xy = fragCoord.xy / iResolution.xy;
+    vec4 texColor = inTex.sample(xy);
+    
+    float luma = 0.2126 * texColor.x + 0.7152 * texColor.y + 0.0722 * texColor.z;
+    //float luma= dot(texColor.rgb,  vec3(0.299, 0.587, 0.114));   
+    float r = color2.x + luma * (color1.x - color2.x);
+    float g = color2.y + luma * (color1.y - color2.y);
+    float b = color2.z + luma * (color1.z - color2.z);
+    
+    vec4 color = vec4(r, g, b,1.0);
+    
+    fragColor = color;//Set the screen pixel to that color
+    return fragColor;
+   
+}
